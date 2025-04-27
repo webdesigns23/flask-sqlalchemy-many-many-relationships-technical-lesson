@@ -14,8 +14,24 @@ tables:
 
 ![Pets Database ERD](/assets/cats-cat_owners-owners.png)
 
+## Scenario
+
+You are now working at Innovatek Solutions, a mid-sized tech consultancy managing 
+complex cross-functional teams.
+
+In your current project, employees often attend multiple meetings across departments. 
+At the same time, employees are assigned to multiple projects — but each assignment 
+has unique attributes like a specific role, start date, and end date.
+
+As the company grows, leadership needs an easier way to:
+* Track who is assigned to which meetings.
+* Understand which employees are contributing to which projects.
+* Capture the nuances of project assignments without bloating the main employee or project tables.
+
+Your job is to design and implement many-to-many relationships in the database using Flask-SQLAlchemy. This will allow the team to query meeting attendees, manage project assignments, and keep the database clean, scalable, and efficient.
+
 In this lesson, we'll learn different ways to implement **many-to-many**
-relationships for a data model containing employees, meetings, projects , and
+relationships for a data model containing employees, meetings, projects, and
 assignments:
 
 ![Employee Many to Many ERD](/assets/employee_many_many_erd.png)
@@ -61,9 +77,45 @@ $ export FLASK_RUN_PORT=5555
 The file `server/models.py` defines models named `Employee`, `Meeting`, and
 `Project`. Relationships have not been established between the models.
 
+We need to establish two different many-to-many relationships:
+* Employees ↔ Meetings:
+    * Each employee can attend many meetings, and each meeting can have many employees.
+* Employees ↔ Projects (through Assignments):
+    * Each employee can be assigned to many projects, and each project can have many employees. Each assignment has additional attributes (role, start date, end date) beyond just linking the records.
+
+Without properly structured many-to-many relationships:
+* Tracking attendance and assignments would be difficult without duplicating data.
+* Queries would become complex, slow, and error-prone.
+* Important metadata (like an employee’s project role or start date) could get lost.
+
+The system must allow:
+* Direct querying of related records from either side.
+* Storage of relationship-specific attributes when necessary.
+* Proper database normalization and referential integrity.
+
 ### Task 2: Determine the Design
 
+The technical design includes:
+
+* Employee ↔ Meeting Relationship:
+    * Implemented using a simple association table (employee_meetings) built with db.Table.
+    * Both Employee and Meeting models will use the secondary argument in their relationship() definitions.
+    * Migrations will ensure the join table is created.
+* Employee ↔ Project Relationship (through Assignments):
+    * Implemented using a full model (Assignment) that acts as an association object.
+    * Assignment will store foreign keys to Employee and Project, plus additional columns like role, start_date, and end_date.
+    * Employee and Project models will be connected via a relationship() with back_populates, and an association proxy will be added for clean access across assignments.
+* Cascade Behavior:
+    * Cascades (all, delete-orphan) will ensure related assignments are properly removed when employees or projects are deleted.
+* Seeding Strategy:
+    * Pre-populate employees, meetings, projects, and assignments with realistic data that links records properly.
+* Testing Strategy:
+    * Use the Flask shell to validate that employees can access their meetings and projects easily.
+    * Confirm that deleting employees/projects automatically removes linked assignments or associations.
+
 ### Task 3: Develop, Test, and Refine the Code
+
+#### Step 1: Seed the Database
 
 Run the following commands to create and seed the tables with sample data.
 
@@ -74,7 +126,7 @@ $ flask db upgrade head
 $ python seed.py
 ```
 
-#### Step 1: Many-To-Many with `Table` Objects
+#### Step 2: Create Many-To-Many Relationship with `Table` Objects
 
 Many-to-many relationships in SQLAlchemy use intermediaries called **association
 tables** (also called join tables). These are tables that exist only to join two
@@ -214,7 +266,7 @@ $ flask shell
 [<Meeting 1, Software Engineering Weekly Update, 2023-10-31 09:30:00, Building A, Room 142>, <Meeting 2, Github Issues Brainstorming, 2023-12-01 15:15:00, Building D, Room 430>]
 ```
 
-#### Step 2: Many-To-Many with Association Objects
+#### Step 3: Create Many-To-Many Relationship with Association Objects
 
 An employee is assigned to work on many projects, and a project may have many
 employees assigned to it. The database needs to keep track of the employee's
@@ -371,10 +423,10 @@ $ flask shell
 [<Assignment 1, Project manager, 2023-05-28 00:00:00, 2023-10-30 00:00:00, Uri Lee, XYZ Project Flask server>, <Assignment 2, Flask programmer, 2023-06-10 00:00:00, 2023-10-01 00:00:0
 ```
 
-#### Step 3: Association Proxy
+#### Step 4: Add Association Proxies to Models
 
 What about getting a list of projects for a given employee, or a list of
-employees for a given project? Currently we would have to do this by iterating
+employees for a given project? Currently, we would have to do this by iterating
 over the intermediary assignments. For example, to get a list of employees
 working on project #1, we need to iterate through the project's assignments to
 then get the employee associated with each assignment:
@@ -437,11 +489,11 @@ class Project(db.Model):
 ```
 
 The first argument indicates the relationship property we intend to use as
-'connector' and the second argument indicates the name of the model we're trying
+'connector', and the second argument indicates the name of the model we're trying
 to connect to. The `creator` parameter takes a function (an anonymous lambda
-function in this case) which accepts as argument an object of the other
+function in this case) which accepts as an argument an object of the other
 independent class and returns the corresponding object of the 'connecting' class
-that made the connection possible. For the associaion proxy inside `Employee`,
+that made the connection possible. For the association proxy inside `Employee`,
 we're saying that we want to use the `assignments` relationship to connect to
 the `Project` model. The `creator` function takes a `Project` object and returns
 an `Assignment` object.
@@ -466,10 +518,10 @@ As well as the projects for an employee:
 ```
 
 An association proxy does not modify the schema, it simply provides direct
-read/write assess between `Employee` and `Project` across the intermediary
+read/write access between `Employee` and `Project` across the intermediary
 `Assignment.`
 
-#### Step 4: Verify your Code
+#### Step 5: Verify your Code
 
 Your final solution should look like:
 
@@ -654,7 +706,7 @@ with app.app_context():
     db.session.commit()
 ```
 
-#### Step 5: Commit and Push Git History
+#### Step 6: Commit and Push Git History
 
 * Commit and push your code:
 
@@ -689,3 +741,34 @@ you to follow, and how the underlying database relationships work, you have the
 ability to model all kinds of complex, real-world concepts in your code!
 
 ## Considerations
+
+### Choosing Between Table and Full Model:
+
+* Use a Table for simple many-to-many relationships without extra data (e.g., Employees ↔ Meetings).
+
+* Use a full model (association object) when you need to store additional attributes on the relationship itself (e.g., Employees ↔ Projects through Assignments).
+
+### Association Proxy Usage:
+
+* Introduce association proxies to provide intuitive access patterns like employee.projects or project.employees without manually traversing intermediary tables.
+
+* Association proxies greatly simplify queries for front-end and API layers.
+
+### Cascade Deletions:
+
+* Always define cascades (all, delete-orphan) to keep the database clean and prevent orphaned records.
+
+* Without proper cascades, manual cleanup could become necessary, leading to potential data integrity problems.
+
+### Migration Management:
+
+* When adding association tables or models, create incremental, clearly named migration scripts (e.g., add_employee_meetings_association_table).
+
+### Performance Considerations:
+
+* Be mindful that many-to-many relationships can grow large quickly. Always index foreign key columns for faster queries.
+
+### Naming Conventions:
+
+* Follow consistent and intuitive table naming (employee_meetings, assignments) to avoid confusion, especially as database complexity increases.
+
