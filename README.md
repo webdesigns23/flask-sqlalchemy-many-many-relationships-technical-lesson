@@ -1,10 +1,4 @@
-# Many-To-Many Relationships : Code-Along
-
-## Learning Goals
-
-- Use Flask-SQLAlchemy to join tables with many-to-many relationships.
-
----
+# Technical Lesson: Many-To-Many Relationships
 
 ## Introduction
 
@@ -33,7 +27,11 @@ assignments:
 - An assignment **belongs to** an employee.
 - An assignment **belongs to** a project.
 
----
+## Tools & Resources
+
+- [GitHub Repo](https://github.com/learn-co-curriculum/flask-sqlalchemy-many-many-relationships-technical-lesson)
+- [SQLAlchemy ORM Documentation](https://docs.sqlalchemy.org/en/14/orm/)
+- [Basic Relationship Patterns - SQLAlchemy](https://docs.sqlalchemy.org/en/14/orm/basic_relationships.html)
 
 ## Setup
 
@@ -56,8 +54,16 @@ $ export FLASK_APP=app.py
 $ export FLASK_RUN_PORT=5555
 ```
 
+## Instructions
+
+### Task 1: Define the Problem
+
 The file `server/models.py` defines models named `Employee`, `Meeting`, and
 `Project`. Relationships have not been established between the models.
+
+### Task 2: Determine the Design
+
+### Task 3: Develop, Test, and Refine the Code
 
 Run the following commands to create and seed the tables with sample data.
 
@@ -465,23 +471,6 @@ An association proxy does not modify the schema, it simply provides direct
 read/write assess between `Employee` and `Project` across the intermediary
 `Assignment.`
 
-## Conclusion
-
-The power of SQLAlchemy all boils down to understanding database relationships
-and making use of the correct classes and methods. By leveraging "convention
-over configuration", we're able to quickly set up complex associations between
-multiple models with just a few lines of code.
-
-The one-to-many and many-to-many relationships are the most common when working
-with relational databases. By understanding the conventions SQLAlchemy expects
-you to follow, and how the underlying database relationships work, you have the
-ability to model all kinds of complex, real-world concepts in your code!
-
-## Resources
-
-- [SQLAlchemy ORM Documentation](https://docs.sqlalchemy.org/en/14/orm/)
-- [Basic Relationship Patterns - SQLAlchemy](https://docs.sqlalchemy.org/en/14/orm/basic_relationships.html)
-
 ## Solution
 
 ```py
@@ -665,3 +654,25 @@ with app.app_context():
     db.session.commit()
 
 ```
+
+### Task 4: Document and Maintain
+
+Best Practice documentation steps:
+* Add comments to the code to explain purpose and logic, clarifying intent and functionality of your code to other developers.
+* Update README text to reflect the functionality of the application following https://makeareadme.com. 
+  * Add screenshot of completed work included in Markdown in README.
+* Delete any stale branches on GitHub
+* Remove unnecessary/commented out code
+* If needed, update git ignore to remove sensitive data
+
+## Summary
+
+The power of SQLAlchemy all boils down to understanding database relationships
+and making use of the correct classes and methods. By leveraging "convention
+over configuration", we're able to quickly set up complex associations between
+multiple models with just a few lines of code.
+
+The one-to-many and many-to-many relationships are the most common when working
+with relational databases. By understanding the conventions SQLAlchemy expects
+you to follow, and how the underlying database relationships work, you have the
+ability to model all kinds of complex, real-world concepts in your code!
