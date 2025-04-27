@@ -12,13 +12,13 @@ instance, in a domain where a cat has many owners and an owner has many cats, we
 need to create a table named **cat_owners** with foreign keys to the two related
 tables:
 
-![Pets Database ERD](https://curriculum-content.s3.amazonaws.com/phase-3/sql-table-relations-creating-join-tables/cats-cat_owners-owners.png)
+![Pets Database ERD](/assets/cats-cat_owners-owners.png)
 
 In this lesson, we'll learn different ways to implement **many-to-many**
 relationships for a data model containing employees, meetings, projects , and
 assignments:
 
-![Employee Many to Many ERD](https://curriculum-content.s3.amazonaws.com/7159/python-p4-v2-flask-sqlalchemy/employee_many_many_erd.png)
+![Employee Many to Many ERD](/assets/employee_many_many_erd.png)
 
 - An employee **has many** meetings.
 - A meeting **has many** employees.
@@ -74,7 +74,7 @@ $ flask db upgrade head
 $ python seed.py
 ```
 
-## Many-To-Many with `Table` Objects
+#### Step 1: Many-To-Many with `Table` Objects
 
 Many-to-many relationships in SQLAlchemy use intermediaries called **association
 tables** (also called join tables). These are tables that exist only to join two
@@ -84,7 +84,7 @@ There are two approaches to building these associations: association objects,
 which are most similar to the models we've built so far, and the more common
 approach, `Table` objects.
 
-![employee meetings join table](https://curriculum-content.s3.amazonaws.com/7159/python-p4-v2-flask-sqlalchemy/employee_meetings_fk.png)
+![employee meetings join table](/assets/employee_meetings_fk.png)
 
 We'll implement the many-to-many between `employees` and `meetings` by creating
 a table named `employee_meetings`. Since `employee_meetings` is on the **many**
@@ -196,7 +196,7 @@ $ python seed.py
 
 Let's confirm the database table has the correct rows:
 
-![employee meetings table data](https://curriculum-content.s3.amazonaws.com/7159/python-p4-v2-flask-sqlalchemy/employee_meetings_table.png)
+![employee meetings table data](/assets/employee_meetings_table.png)
 
 We can explore the relationship using Flask shell:
 
@@ -214,7 +214,7 @@ $ flask shell
 [<Meeting 1, Software Engineering Weekly Update, 2023-10-31 09:30:00, Building A, Room 142>, <Meeting 2, Github Issues Brainstorming, 2023-12-01 15:15:00, Building D, Room 430>]
 ```
 
-## Many-To-Many with Association Objects
+#### Step 2: Many-To-Many with Association Objects
 
 An employee is assigned to work on many projects, and a project may have many
 employees assigned to it. The database needs to keep track of the employee's
@@ -223,7 +223,7 @@ project. We'll use an **association object** to capture the relationship between
 an employee and a project, along with the attributes (`role`, `start_date`,
 `end_date`) that are specific to the assignment.
 
-![employee assignment project erd](https://curriculum-content.s3.amazonaws.com/7159/python-p4-v2-flask-sqlalchemy/employee_assignment_project.png)
+![employee assignment project erd](/assets/employee_assignment_project.png)
 
 An association object is really just another model, thus the many-to-many
 relationship between `Employee` and `Project` is implemented as two one-to-many
@@ -356,9 +356,7 @@ Re-seed the database:
 $ python seed.py
 ```
 
-Let's check the `assignments` table to confirm the 3 new rows:
-
-![assignment table with data](https://curriculum-content.s3.amazonaws.com/7159/python-p4-v2-flask-sqlalchemy/assignment_data.png)
+Check the `assignments` table to confirm the 3 new rows.
 
 We can use Flask shell to get assignments for an employee or a project:
 
@@ -373,7 +371,7 @@ $ flask shell
 [<Assignment 1, Project manager, 2023-05-28 00:00:00, 2023-10-30 00:00:00, Uri Lee, XYZ Project Flask server>, <Assignment 2, Flask programmer, 2023-06-10 00:00:00, 2023-10-01 00:00:0
 ```
 
-## Association Proxy
+#### Step 3: Association Proxy
 
 What about getting a list of projects for a given employee, or a list of
 employees for a given project? Currently we would have to do this by iterating
@@ -471,7 +469,9 @@ An association proxy does not modify the schema, it simply provides direct
 read/write assess between `Employee` and `Project` across the intermediary
 `Assignment.`
 
-## Solution
+#### Step 4: Verify your Code
+
+Your final solution should look like:
 
 ```py
 # server/models.py
@@ -652,8 +652,19 @@ with app.app_context():
 
     db.session.add_all([a1, a2, a3])
     db.session.commit()
-
 ```
+
+#### Step 5: Commit and Push Git History
+
+* Commit and push your code:
+
+```bash
+git add .
+git commit -m "final solution"
+git push
+```
+
+* If you created a separate feature branch, remember to open a PR on main and merge.
 
 ### Task 4: Document and Maintain
 
@@ -676,3 +687,5 @@ The one-to-many and many-to-many relationships are the most common when working
 with relational databases. By understanding the conventions SQLAlchemy expects
 you to follow, and how the underlying database relationships work, you have the
 ability to model all kinds of complex, real-world concepts in your code!
+
+## Considerations
