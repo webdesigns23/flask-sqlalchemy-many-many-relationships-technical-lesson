@@ -132,9 +132,14 @@ Many-to-many relationships in SQLAlchemy use intermediaries called **association
 tables** (also called join tables). These are tables that exist only to join two
 related tables together.
 
-There are two approaches to building these associations: association objects,
-which are most similar to the models we've built so far, and the more common
-approach, `Table` objects.
+There are two ways to building these associations: association objects,
+which are most similar to the models we've built so far, and `Table` objects.
+
+Table objects are ideal when the sole purpose of the table is to join a many-to-many 
+relationship between two tables. The employee_meetings join table will not store any 
+information beyond what’s needed to establish the relationship, so we don’t need a 
+model to establish EmployeeMeeting objects or retrieve any additional data from this 
+table.
 
 ![employee meetings join table](/assets/employee_meetings_fk.png)
 
@@ -271,7 +276,9 @@ $ flask shell
 An employee is assigned to work on many projects, and a project may have many
 employees assigned to it. The database needs to keep track of the employee's
 role on the project, along with the dates they start and end working on the
-project. We'll use an **association object** to capture the relationship between
+project. Since this join table is responsible for more information than just 
+establishing the many-to-many relationship between projects and employees, 
+we’ll use an **association object** to capture the relationship between
 an employee and a project, along with the attributes (`role`, `start_date`,
 `end_date`) that are specific to the assignment.
 
